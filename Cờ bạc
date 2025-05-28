@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Game Slot Machine</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 20px;
+      background: url('https://image.lag.vn/upload/news/21/09/17/fanart-draken-tokyo-revengers-10_WUIH.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h2, h3, h4 {
+      text-shadow: 0 0 8px #000;
+    }
+    #register-area, #login-area {
+      background: rgba(0,0,0,0.7);
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.8);
+      max-width: 320px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #ffbb33;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: #222;
+      font-size: 1.1rem;
+      margin-top: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button:hover {
+      background-color: #ffaa00;
+    }
+    #auth-buttons button {
+      width: 140px;
+      margin: 10px 10px 0 0;
+    }
+    #game-section {
+      background: rgba(0,0,0,0.6);
+      padding: 20px 30px;
+      border-radius: 15px;
+      margin-top: 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 0 20px rgba(255, 187, 51, 0.8);
+    }
+    #user-panel, #admin-panel {
+      background: rgba(0,0,0,0.7);
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 15px;
+      max-height: 280px;
+      overflow-y: auto;
+      font-size: 0.95rem;
+    }
+    .log-entry {
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+    #balance {
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: #ffcc33;
+      text-shadow: 0 0 5px #ff9900;
+    }
+    #current-user {
+      color: #ffbb33;
+      font-weight: bold;
+      text-shadow: 0 0 5px #ff9900;
+    }
+    #game-section > div > button {
+      background-color: #cc3300;
+      color: white;
+      float: right;
+      width: auto;
+      padding: 6px 12px;
+      margin-top: 0;
+    }
+    #game-section > div > button:hover {
+      background-color: #dd4422;
+    }
+    .delete-btn {
+      background-color: #ff3333;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 5px;
+      margin-left: 10px;
+      font-size: 0.8rem;
+    }
+    .delete-btn:hover {
+      background-color: #ff5555;
+    }
+    #user-list {
+      margin-top: 10px;
+    }
+    .user-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #444;
+    }
+    .clear-logs-btn {
+      background-color: #9933ff;
+      color: white;
+      margin-top: 10px;
+    }
+    .clear-logs-btn:hover {
+      background-color: #aa55ff;
+    }
+    .log-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    /* --- IP Management styles --- */
+    #ip-management {
+      margin-top: 24px;
+      background: rgba(0,0,0,0.7);
+      padding: 15px;
+      border-radius: 15px;
+    }
+    #ip-list {
+      margin-top: 10px;
+    }
+    .ip-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #444;
+    }
+    .block-ip-btn, .unblock-ip-btn {
+      background-color: #e53935;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 5px;
+      margin-left: 10px;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .block-ip-btn:hover {
+      background-color: #ff1744;
+    }
+    .unblock-ip-btn {
+      background-color: #43a047;
+    }
+    .unblock-ip-btn:hover {
+      background-color: #66bb6a;
+    }
+    .blocked-ip {
+      color: #ffbb33;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    /* --- User IP list for admin --- */
+    .admin-user-ip-list {
+      margin-top: 6px;
+      font-size: 0.95em;
+      padding-left: 10px;
+      color: #ffeb3b;
+    }
+    .admin-user-ip-list-title {
+      font-size: 0.93em;
+      color: #bbb;
+      margin-left: 6px;
+    }
+    .admin-ip-entry {
+      margin-bottom: 2px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <h2>Web Game Slot Machine</h2>
+
+  <div id="login-section">
+    <div id="auth-buttons">
+      <button onclick="showLogin()">Đăng nhập</button>
+      <button onclick="showRegister()">Đăng ký</button>
+    </div>
+
+    <div id="register-area" style="display:none;">
+      <h3>Đăng ký</h3>
+      <input id="reg-username" placeholder="Tên đăng nhập" autocomplete="off" />
+      <input id="reg-password" type="password" placeholder="Mật khẩu" autocomplete="new-password" />
+      <input id="reg-password2" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
+      <button onclick="register()">Đăng ký</button>
+      <div id="register-message" style="color:#f88; margin-top:5px;"></div>
+      <button onclick="hideForms()">Quay lại</button>
+    </div>
+
+    <div id="login-area" style="display:none;">
+      <h3>Đăng nhập</h3>
+      <input id="login-username" placeholder="Tên đăng nhập" autocomplete="username" />
+      <input id="login-password" type="password" placeholder="Mật khẩu" autocomplete="current-password" />
+      <button onclick="login()">Đăng nhập</button>
+      <div id="login-message" style="color:#f88; margin-top:5px;"></div>
+      <button onclick="hideForms()">Quay lại</button>
+    </div>
+  </div>
+
+  <div id="game-section" style="display:none;">
+    <div>
+      Xin chào, <span id="current-user"></span> | Số dư: <span id="balance"></span>
+      <button onclick="logout()">Đăng xuất</button>
+    </div>
+
+    <br />
+    <button onclick="play()">Chơi Slot Machine (0.25$ mỗi lượt)</button>
+
+    <div id="user-panel" style="display:none;">
+      <h3>Lịch sử chơi của bạn</h3>
+      <div id="user-logs"></div>
+      <!-- KHÔNG cho user tự xem IP của mình ở đây -->
+    </div>
+
+    <div id="admin-panel" style="display:none;">
+      <h3>Quản trị viên - Thống kê</h3>
+      <div>Tổng số user đăng ký: <span id="user-count"></span></div>
+      
+      <div id="user-management">
+        <h4>Quản lý người dùng</h4>
+        <div id="user-list"></div>
+      </div>
+      
+      <div id="log-management" style="margin-top:20px;">
+        <h4>Quản lý lịch sử</h4>
+        <div class="log-controls">
+          <button onclick="clearAllLogs()" class="clear-logs-btn">Xóa toàn bộ lịch sử</button>
+          <button onclick="clearOldLogs()" class="clear-logs-btn">Xóa lịch sử cũ (giữ 20 bản ghi mới nhất)</button>
+        </div>
+        <div id="admin-logs" style="margin-top:10px;"></div>
+      </div>
+
+      <div id="ip-management">
+        <h4>Quản lý IP bị chặn</h4>
+        <div>
+          <input id="add-ip-input" placeholder="Nhập IP để chặn (vd: 1.2.3.4)" style="width:170px;" />
+          <button onclick="addBlockedIP()" class="block-ip-btn">Chặn IP</button>
+        </div>
+        <div id="ip-list"></div>
+      </div>
+      <div id="admin-user-ip-management" style="margin-top:24px;">
+        <h4>IP các thiết bị đã đăng nhập theo từng tài khoản</h4>
+        <div id="admin-user-ip-table"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- IP lấy từ thiết bị ---
+  async function getCurrentIP() {
+    try {
+      let res = await fetch('https://api.ipify.org?format=json');
+      let data = await res.json();
+      return data.ip;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // --- Quản lý IP từng user ---
+  function getUserIPs(username) {
+    const map = JSON.parse(localStorage.getItem("userIPs") || "{}");
+    return Array.isArray(map[username]) ? map[username] : [];
+  }
+  function saveUserIPs(username, ipArr) {
+    const map = JSON.parse(localStorage.getItem("userIPs") || "{}");
+    map[username] = ipArr;
+    localStorage.setItem("userIPs", JSON.stringify(map));
+  }
+  function addUserIP(username, ip) {
+    if (!username || !ip) return;
+    let ipArr = getUserIPs(username);
+    if (!ipArr.includes(ip)) {
+      ipArr.push(ip);
+      saveUserIPs(username, ipArr);
+    }
+  }
+  function removeUserIP(username, ip) {
+    let ipArr = getUserIPs(username);
+    ipArr = ipArr.filter(x => x !== ip);
+    saveUserIPs(username, ipArr);
+    renderAdminUserIPTable();
+  }
+
+  // --- IP block toàn hệ thống ---
+  function getBlockedIPs() {
+    return JSON.parse(localStorage.getItem("blockedIPs") || "[]");
+  }
+  function saveBlockedIPs(ipArr) {
+    localStorage.setItem("blockedIPs", JSON.stringify(ipArr));
+  }
+  function isBlockedIP(ip) {
+    let arr = getBlockedIPs();
+    return arr.includes(ip);
+  }
+  function addBlockedIPToList(ip) {
+    let arr = getBlockedIPs();
+    if (!arr.includes(ip)) {
+      arr.push(ip);
+      saveBlockedIPs(arr);
+    }
+  }
+  function removeBlockedIPFromList(ip) {
+    let arr = getBlockedIPs();
+    arr = arr.filter(x => x !== ip);
+    saveBlockedIPs(arr);
+  }
+  function renderBlockedIPList() {
+    const container = document.getElementById("ip-list");
+    const arr = getBlockedIPs();
+    container.innerHTML = "";
+
+    if (arr.length === 0) {
+      container.textContent = "Không có IP nào bị chặn.";
+      return;
+    }
+
+    arr.forEach(ip => {
+      const div = document.createElement("div");
+      div.className = "ip-item";
+      div.innerHTML = `<span>${ip}</span>`;
+
+      const unBlockBtn = document.createElement("button");
+      unBlockBtn.className = "unblock-ip-btn";
+      unBlockBtn.textContent = "Bỏ chặn";
+      unBlockBtn.onclick = () => {
+        if (confirm("Bỏ chặn IP này?")) {
+          removeBlockedIPFromList(ip);
+          renderBlockedIPList();
+        }
+      };
+
+      div.appendChild(unBlockBtn);
+      container.appendChild(div);
+    });
+  }
+  function addBlockedIP() {
+    const ip = document.getElementById("add-ip-input").value.trim();
+    if (!ip) return alert("Nhập IP cần chặn!");
+    if (!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+      alert("IP không hợp lệ!");
+      return;
+    }
+    addBlockedIPToList(ip);
+    document.getElementById("add-ip-input").value = "";
+    renderBlockedIPList();
+    alert("Đã chặn IP " + ip);
+  }
+
+  // --- Hiển thị bảng IP từng user cho admin ---
+  function renderAdminUserIPTable() {
+    const container = document.getElementById("admin-user-ip-table");
+    container.innerHTML = "";
+    const userIPsMap = JSON.parse(localStorage.getItem("userIPs") || "{}");
+    const users = getUsers();
+    const userNames = Object.keys(users).filter(u => u !== "acbd");
+    if (userNames.length === 0) {
+      container.textContent = "Chưa có user nào.";
+      return;
+    }
+    userNames.forEach(username => {
+      const userIps = Array.isArray(userIPsMap[username]) ? userIPsMap[username] : [];
+      const row = document.createElement("div");
+      row.innerHTML = `<b style="color:#fff">${username}</b>`;
+      if (userIps.length === 0) {
+        const span = document.createElement("span");
+        span.className = "admin-user-ip-list admin-ip-entry";
+        span.textContent = "Chưa có IP nào.";
+        row.appendChild(span);
+      } else {
+        const ipList = document.createElement("div");
+        ipList.className = "admin-user-ip-list";
+        userIps.forEach(ip => {
+          const ipEntry = document.createElement("div");
+          ipEntry.className = "admin-ip-entry";
+          ipEntry.textContent = ip;
+          // chỉ admin mới có thể xóa IP của user
+          if (userIps.length > 1) {
+            const btn = document.createElement("button");
+            btn.className = "remove-user-ip-btn";
+            btn.textContent = "Xóa";
+            btn.onclick = () => {
+              if (confirm(`Bạn có chắc muốn xóa IP ${ip} khỏi tài khoản ${username}?`)) {
+                removeUserIP(username, ip);
+              }
+            };
+            ipEntry.appendChild(btn);
+          }
+          ipList.appendChild(ipEntry);
+        });
+        row.appendChild(ipList);
+      }
+      container.appendChild(row);
+    });
+  }
+
+  // --- Toàn bộ logic game ---
+  let currentUser = null;
+  let balance = 0;
+  let isAdmin = false;
+  let clientIP = null;
+
+  // Lấy IP khi load trang
+  getCurrentIP().then(ip => {
+    clientIP = ip;
+    // Nếu cần block IP toàn hệ thống thì xử lý tại đây
+    if (isBlockedIP(clientIP)) {
+      document.body.innerHTML = "<div style='color:#fff;text-align:center;margin-top:60px;font-size:1.3rem;background:rgba(0,0,0,0.8);padding:30px 20px;border-radius:18px;'>IP của bạn đã bị chặn bởi quản trị viên.<br>Vui lòng liên hệ admin để được hỗ trợ!</div>";
+    }
+  });
+
+  function showRegister() {
+    if (clientIP && isBlockedIP(clientIP)) {
+      alert("IP của bạn đã bị chặn bởi quản trị viên.");
+      return;
+    }
+    document.getElementById("auth-buttons").style.display = "none";
+    document.getElementById("register-area").style.display = "block";
+    document.getElementById("login-area").style.display = "none";
+    clearMessages();
+    resetRegisterForm();
+  }
+  function showLogin() {
+    if (clientIP && isBlockedIP(clientIP)) {
+      alert("IP của bạn đã bị chặn bởi quản trị viên.");
+      return;
+    }
+    document.getElementById("auth-buttons").style.display = "none";
+    document.getElementById("register-area").style.display = "none";
+    document.getElementById("login-area").style.display = "block";
+    clearMessages();
+    resetLoginForm();
+  }
+  function hideForms() {
+    document.getElementById("auth-buttons").style.display = "block";
+    document.getElementById("register-area").style.display = "none";
+    document.getElementById("login-area").style.display = "none";
+    clearMessages();
+  }
+  function clearMessages() {
+    document.getElementById("register-message").textContent = "";
+    document.getElementById("login-message").textContent = "";
+  }
+  function resetRegisterForm() {
+    document.getElementById("reg-username").value = "";
+    document.getElementById("reg-password").value = "";
+    document.getElementById("reg-password2").value = "";
+  }
+  function resetLoginForm() {
+    document.getElementById("login-username").value = "";
+    document.getElementById("login-password").value = "";
+  }
+
+  function hashString(str) {
+    let hash = 0, i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+      chr = str.charCodeAt(i);
+      hash = (hash << 5) - hash + chr;
+      hash |= 0;
+    }
+    return hash.toString();
+  }
+
+  function formatMoney(amount) {
+    return `$${amount.toFixed(2)}`;
+  }
+
+  function getUsers() {
+    return JSON.parse(localStorage.getItem("users") || "{}");
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem("users", JSON.stringify(users));
+  }
+
+  function getLogs() {
+    return JSON.parse(localStorage.getItem("logs") || "[]");
+  }
+
+  function saveLogs(logs) {
+    localStorage.setItem("logs", JSON.stringify(logs));
+  }
+
+  function addLog(log) {
+    let logs = getLogs();
+    logs.push(log);
+    if (logs.length > 100) logs.shift();
+    saveLogs(logs);
+  }
+
+  function parsePlayLog(action) {
+    if (!action.startsWith("Played slot") && !action.startsWith("Played numbers")) return null;
+
+    let parts = action.split(": ");
+    if (parts.length < 2) return null;
+    let details = parts[1].split(", ");
+
+    let spinResult = details[0];
+    let winMsg = details[1] || "";
+    let winAmount = details[2] || "";
+
+    let vietMsg = "";
+    if (winMsg.includes("lớn")) vietMsg = "Thắng lớn";
+    else if (winMsg.includes("nhỏ")) vietMsg = "Thắng nhỏ";
+    else if (winMsg.includes("không")) vietMsg = "Thua";
+    else vietMsg = winMsg;
+
+    return {
+      spinResult,
+      vietMsg,
+      winAmount
+    };
+  }
+
+  function updateAdminPanel() {
+    const users = getUsers();
+    document.getElementById("user-count").textContent = Object.keys(users).length;
+    document.getElementById("current-user").textContent = currentUser;
+
+    if (isAdmin) {
+      document.getElementById("admin-panel").style.display = "block";
+      document.getElementById("user-panel").style.display = "none";
+      // Update user list
+      const userListContainer = document.getElementById("user-list");
+      userListContainer.innerHTML = "";
+      Object.keys(users).forEach(username => {
+        if (username === "acbd") return; // Skip admin account
+        const userItem = document.createElement("div");
+        userItem.className = "user-item";
+        const userInfo = document.createElement("span");
+        userInfo.textContent = `${username} (Số dư: ${formatMoney(users[username].balance || 0)})`;
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "Xóa";
+        deleteBtn.onclick = () => deleteUser(username);
+        userItem.appendChild(userInfo);
+        userItem.appendChild(deleteBtn);
+        userListContainer.appendChild(userItem);
+      });
+
+      const allLogs = getLogs();
+      const container = document.getElementById("admin-logs");
+      container.innerHTML = "";
+      if (allLogs.length === 0) {
+        container.textContent = "Chưa có lịch sử chơi nào.";
+        return;
+      }
+      for (let i = allLogs.length - 1; i >= 0; i--) {
+        const entry = allLogs[i];
+        const div = document.createElement("div");
+        div.className = "log-entry";
+        div.textContent = `[${entry.time}] Người chơi: ${entry.user} - ${entry.action}`;
+        container.appendChild(div);
+      }
+
+      // Render Blocked IP list
+      renderBlockedIPList();
+
+      // Render bảng IP từng tài khoản
+      renderAdminUserIPTable();
+    } else {
+      document.getElementById("admin-panel").style.display = "none";
+      document.getElementById("user-panel").style.display = "block";
+      updateUserPanel();
+      // KHÔNG renderUserIPList ở đây (user không được xem IP)
+    }
+  }
+
+  function deleteUser(username) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa người dùng ${username}?`)) return;
+    const users = getUsers();
+    if (!users[username]) {
+      alert("Người dùng không tồn tại!");
+      return;
+    }
+    delete users[username];
+    saveUsers(users);
+    // Remove logs
+    const logs = getLogs().filter(log => log.user !== username);
+    saveLogs(logs);
+    // Remove user IP history
+    const userIPsMap = JSON.parse(localStorage.getItem("userIPs") || "{}");
+    delete userIPsMap[username];
+    localStorage.setItem("userIPs", JSON.stringify(userIPsMap));
+    alert(`Đã xóa người dùng ${username} thành công!`);
+    updateAdminPanel();
+  }
+
+  function clearAllLogs() {
+    if (!confirm("Bạn có chắc chắn muốn xóa TOÀN BỘ lịch sử chơi game?")) return;
+    saveLogs([]);
+    alert("Đã xóa toàn bộ lịch sử chơi game!");
+    updateAdminPanel();
+  }
+
+  function clearOldLogs() {
+    const logs = getLogs();
+    if (logs.length <= 20) {
+      alert("Hiện có ít hơn 20 bản ghi lịch sử, không cần xóa.");
+      return;
+    }
+    if (!confirm(`Bạn có chắc chắn muốn xóa ${logs.length - 20} bản ghi lịch sử cũ (giữ lại 20 bản ghi mới nhất)?`)) return;
+    const newLogs = logs.slice(-20);
+    saveLogs(newLogs);
+    alert(`Đã xóa ${logs.length - 20} bản ghi cũ, giữ lại 20 bản ghi mới nhất!`);
+    updateAdminPanel();
+  }
+
+  function updateUserPanel() {
+    const logs = getLogs();
+    const userLogs = logs.filter(l => l.user === currentUser);
+    const container = document.getElementById("user-logs");
+    container.innerHTML = "";
+    if (userLogs.length === 0) {
+      container.textContent = "Bạn chưa chơi lần nào.";
+      return;
+    }
+    for (let i = userLogs.length - 1; i >= 0; i--) {
+      const entry = userLogs[i];
+      const div = document.createElement("div");
+      div.className = "log-entry";
+      const parsed = parsePlayLog(entry.action);
+      if (parsed) {
+        div.innerHTML = `[${entry.time}] Kết quả: ${parsed.spinResult}, ${parsed.vietMsg} ${parsed.winAmount}`;
+      } else {
+        div.textContent = `[${entry.time}] ${entry.action}`;
+      }
+      container.appendChild(div);
+    }
+    // KHÔNG renderUserIPList ở đây (user không được xem IP)
+  }
+
+  function register() {
+    if (clientIP && isBlockedIP(clientIP)) {
+      document.getElementById("register-message").textContent = "IP của bạn đã bị chặn bởi quản trị viên.";
+      return;
+    }
+    const username = document.getElementById("reg-username").value.trim();
+    const pass1 = document.getElementById("reg-password").value;
+    const pass2 = document.getElementById("reg-password2").value;
+    if (!username || !pass1 || !pass2) {
+      document.getElementById("register-message").textContent = "Vui lòng nhập đầy đủ thông tin.";
+      return;
+    }
+    if (pass1 !== pass2) {
+      document.getElementById("register-message").textContent = "Mật khẩu không khớp.";
+      return;
+    }
+    if (username.toLowerCase() === "acbd") {
+      document.getElementById("register-message").textContent = "Tên đăng nhập 'acbd' đã bị dành cho admin.";
+      return;
+    }
+    const users = getUsers();
+    if (users[username]) {
+      document.getElementById("register-message").textContent = "Tên đăng nhập đã tồn tại.";
+      return;
+    }
+    users[username] = {
+      passwordHash: hashString(pass1),
+      balance: 5.00
+    };
+    saveUsers(users);
+    document.getElementById("register-message").style.color = "#8f8";
+    document.getElementById("register-message").textContent = "Đăng ký thành công! Bạn có 5$ khởi đầu.";
+    resetRegisterForm();
+  }
+
+  function login() {
+    if (clientIP && isBlockedIP(clientIP)) {
+      document.getElementById("login-message").textContent = "IP của bạn đã bị chặn bởi quản trị viên.";
+      return;
+    }
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value;
+    if (!username || !password) {
+      document.getElementById("login-message").textContent = "Vui lòng nhập đầy đủ thông tin.";
+      return;
+    }
+    // Check admin login (hardcoded)
+    if (username.toLowerCase() === "acbd" && password === "acbd") {
+      isAdmin = true;
+      currentUser = "acbd";
+      balance = 0;
+      showGameSection();
+      updateAdminPanel();
+      hideForms();
+      return;
+    }
+    const users = getUsers();
+    if (!users[username]) {
+      document.getElementById("login-message").textContent = "Tên đăng nhập không tồn tại.";
+      return;
+    }
+    if (users[username].passwordHash !== hashString(password)) {
+      document.getElementById("login-message").textContent = "Sai mật khẩu.";
+      return;
+    }
+    isAdmin = false;
+    currentUser = username;
+    balance = users[username].balance || 5.00;
+    showGameSection();
+    // Lưu IP vào danh sách IP của user
+    if (clientIP) addUserIP(currentUser, clientIP);
+    updateAdminPanel();
+    hideForms();
+  }
+
+  function logout() {
+    currentUser = null;
+    balance = 0;
+    isAdmin = false;
+    document.getElementById("game-section").style.display = "none";
+    document.getElementById("auth-buttons").style.display = "block";
+  }
+
+  function showGameSection() {
+    document.getElementById("game-section").style.display = "block";
+    document.getElementById("current-user").textContent = currentUser;
+    document.getElementById("balance").textContent = formatMoney(balance);
+  }
+
+  function play() {
+    if (clientIP && isBlockedIP(clientIP)) {
+      alert("IP của bạn đã bị chặn bởi quản trị viên.");
+      logout();
+      return;
+    }
+    if (!currentUser) return alert("Vui lòng đăng nhập trước khi chơi.");
+    if (isAdmin) return alert("Admin không thể chơi game.");
+
+    if (balance < 0.25) {
+      alert("Số dư không đủ để chơi. Vui lòng nạp thêm hoặc chơi lại sau.");
+      return;
+    }
+
+    balance -= 0.25;
+    const symbols = Array.from({ length: 10 }, (_, i) => i);
+    let spinResult = [];
+    for (let i = 0; i < 3; i++) {
+      spinResult.push(symbols[Math.floor(Math.random() * symbols.length)]);
+    }
+
+    let win = 0;
+    let message = "Không thắng";
+
+    if (spinResult[0] === spinResult[1] && spinResult[1] === spinResult[2]) {
+      win = 10.0;
+      message = "Thắng lớn: 3 số giống nhau";
+    } else if (
+      spinResult[0] === spinResult[1] ||
+      spinResult[1] === spinResult[2] ||
+      spinResult[0] === spinResult[2]
+    ) {
+      win = 0.5;
+      message = "Thắng nhỏ: Có 2 số giống nhau";
+    }
+
+    balance += win;
+
+    if (!isAdmin) {
+      let users = getUsers();
+      users[currentUser].balance = balance;
+      saveUsers(users);
+      // Lưu IP vào danh sách IP của user nếu mới
+      if (clientIP) addUserIP(currentUser, clientIP);
+    }
+
+    const logEntry = {
+      user: currentUser,
+      action: `Played numbers: ${spinResult.join(" ")} , ${message}, +${formatMoney(win)}`,
+      time: new Date().toLocaleString("vi-VN")
+    };
+    addLog(logEntry);
+
+    updateAdminPanel();
+    document.getElementById("balance").textContent = formatMoney(balance);
+
+    alert(`Kết quả: ${spinResult.join(" ")}\n${message}\nTiền hiện có: ${formatMoney(balance)}`);
+  }
+</script>
+</body>
+</html>
